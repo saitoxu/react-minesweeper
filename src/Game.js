@@ -8,14 +8,21 @@ export default class Game extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      board: this.initBoard()
+      board: this._initBoard()
     }
   }
 
-  initBoard() {
+  _initBoard() {
     const bombPlaces = this._initBombPlaces()
-    console.log(bombPlaces)
-    return {}
+    const board = Array.from(
+      new Array(BOARD_SIZE), () => new Array(BOARD_SIZE).fill(
+        { bomb: false, open: false }
+      )
+    )
+    for (let place of bombPlaces) {
+      board[place.x][place.y] = { bomb: true, open: false }
+    }
+    return board
   }
 
   _initBombPlaces() {
@@ -39,6 +46,9 @@ export default class Game extends Component {
 
   handleClick(e) {
     e.preventDefault()
+    this.setState({
+      board: this._initBoard()
+    })
   }
 
   render() {

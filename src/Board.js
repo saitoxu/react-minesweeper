@@ -6,7 +6,15 @@ export default class Board extends Component {
   renderRows() {
     const rows = []
     this.props.board.forEach((row, i) => {
-      rows.push(<Row key={i} row={row} />)
+      rows.push(
+        <Row
+          key={i}
+          row={row}
+          x={i}
+          onClick={this.props.onClick}
+          onRightClick={this.props.onRightClick}
+        />
+      )
     })
     return rows
   }

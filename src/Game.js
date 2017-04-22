@@ -51,12 +51,24 @@ export default class Game extends Component {
     })
   }
 
+  handleClickCell(x, y) {
+    console.log('click', x, y)
+  }
+
+  handleRightClickCell(x, y) {
+    console.log('right click', x, y)
+  }
+
   render() {
     const board = this.state.board
     return (
       <div>
         <button onClick={this.handleClick.bind(this)}>Restart</button>
-        <Board board={board} />
+        <Board
+          board={board}
+          onClick={this.handleClickCell.bind(this)}
+          onRightClick={this.handleRightClickCell.bind(this)}
+        />
       </div>
     )
   }

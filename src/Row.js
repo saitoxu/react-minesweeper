@@ -5,7 +5,16 @@ export default class Row extends Component {
   renderCells() {
     const cells = []
     this.props.row.forEach((cell, i) => {
-      cells.push(<Cell key={i} cell={cell} />)
+      cells.push(
+        <Cell
+          key={i}
+          cell={cell}
+          x={this.props.x}
+          y={i}
+          onClick={this.props.onClick}
+          onRightClick={this.props.onRightClick}
+        />
+      )
     })
     return cells
   }

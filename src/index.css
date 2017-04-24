@@ -1,5 +1,19 @@
 body {
   margin: 0;
   padding: 0;
-  font-family: sans-serif;
+  font-family: "Clear Sans", "Helvetica Neue", Arial, sans-serif;
+}
+a {
+  text-decoration: none;
+  color: skyblue;
+  font-weight: bold;
+}
+a:visited {
+  color: skyblue;
+}
+a:hover {
+  opacity: .8;
+}
+#root {
+  display: flex;
 }

@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import Board from './Board'
+import './Game.css'
 
 const BOARD_SIZE = 9
 const BOMB_NUM = 10
@@ -8,7 +9,9 @@ export default class Game extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      board: this._initBoard()
+      board: this._initBoard(),
+      gameover: false,
+      clear: false
     }
   }
 
@@ -47,15 +50,23 @@ export default class Game extends Component {
   handleClick(e) {
     e.preventDefault()
     this.setState({
-      board: this._initBoard()
+      board: this._initBoard(),
+      gameover: false,
+      clear: false
     })
   }
 
   handleClickCell(x, y) {
+    if (this.state.gameover || this.state.clear) {
+      return
+    }
     this._open(x, y)
   }
 
   handleRightClickCell(x, y) {
+    if (this.state.gameover || this.state.clear) {
+      return
+    }
     this._toggleFlag(x, y)
   }
 
@@ -76,9 +87,17 @@ export default class Game extends Component {
         }
       }
       board[x][y] = Object.assign({}, board[x][y], { open: true, bombCount: bombCount })
-      this.setState({ board: board })
+      if (board[x][y].bomb) {
+        this.setState({ board: board, gameover: true, clear: false })
+      } else {
+        if (this._isClear(board)) {
+          this.setState({ board: board, gameover: false, clear: true })
+        } else {
+          this.setState({ board: board, gameover: false, clear: false })
+        }
+      }
 
-      if (bombCount === 0) {
+      if (bombCount === 0 && !board[x][y].bomb) {
         for (let i = x - 1; i <= x + 1; i++) {
           for (let j = y - 1; j <= y + 1; j++) {
             if ((i < 0 || i >= BOARD_SIZE) ||
@@ -91,6 +110,18 @@ export default class Game extends Component {
         }
       }
     }
+  }
+
+  _isClear(board) {
+    let openCount = 0
+    board.forEach((row, i) => {
+      row.forEach((cell, i) => {
+        if (cell.open) {
+          openCount++
+        }
+      })
+    })
+    return openCount === (BOARD_SIZE * BOARD_SIZE - BOMB_NUM)
   }
 
   _toggleFlag(x, y) {
@@ -106,14 +137,32 @@ export default class Game extends Component {
   render() {
     const board = this.state.board
     return (
-      <div>
+      <div id="game">
         <h1>Minesweeper</h1>
-        <button onClick={this.handleClick.bind(this)}>Restart</button>
+        <div id="menu">
+          <button onClick={this.handleClick.bind(this)} id="restart">Restart</button>
+          {this.state.gameover && <span id="gameover">Gameover</span>}
+          {this.state.clear && <span id="clear">Clear!</span>}
+        </div>
         <Board
           board={board}
           onClick={this.handleClickCell.bind(this)}
           onRightClick={this.handleRightClickCell.bind(this)}
         />
+        <div>
+          <p>
+            <span style={{fontWeight: 'bold', color: 'gray'}}>HOW TO PLAY: </span>
+            <span>Click a cell then open it. You can toggle a flag by right click.</span>
+          </p>
+          <hr />
+          <p style={{textAlign: 'right'}}>
+            <span>Created by </span>
+            <a href="https://github.com/saitoxu">Yosuke Saito</a>
+            <br />
+            <span>View </span>
+            <a href="https://github.com/saitoxu/react-minesweeper">Code</a>
+          </p>
+        </div>
       </div>
     )
   }

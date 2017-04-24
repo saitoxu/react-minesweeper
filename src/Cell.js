@@ -3,14 +3,14 @@ import Flag from 'react-icons/lib/fa/flag'
 import Bomb from 'react-icons/lib/fa/certificate'
 
 const baseStyle = {
-  fontFamily: 'Meiryo,"MS PGothic",sans-serif',
   width: 24,
   height: 24,
   backgroundColor: 'lightgray',
   border: 'outset 4px white',
   textAlign: 'center',
   lineHeight: '24px',
-  fontWeight: 'bold'
+  fontWeight: 'bold',
+  cursor: 'pointer'
 }
 
 const openStyle = {

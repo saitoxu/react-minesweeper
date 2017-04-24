@@ -16,11 +16,11 @@ export default class Game extends Component {
     const bombPlaces = this._initBombPlaces()
     const board = Array.from(
       new Array(BOARD_SIZE), () => new Array(BOARD_SIZE).fill(
-        { bomb: false, open: false }
+        { bomb: false, bombCount: 0, open: false, flagged: false }
       )
     )
     for (let place of bombPlaces) {
-      board[place.x][place.y] = { bomb: true, open: false }
+      board[place.x][place.y] = Object.assign({}, board[place.x][place.y], { bomb: true })
     }
     return board
   }
@@ -52,17 +52,62 @@ export default class Game extends Component {
   }
 
   handleClickCell(x, y) {
-    console.log('click', x, y)
+    this._open(x, y)
   }
 
   handleRightClickCell(x, y) {
-    console.log('right click', x, y)
+    this._toggleFlag(x, y)
+  }
+
+  _open(x, y) {
+    const board = [].concat(this.state.board)
+    if (!board[x][y].open) {
+      let bombCount = 0
+      for (let i = x - 1; i <= x + 1; i++) {
+        for (let j = y - 1; j <= y + 1; j++) {
+          if ((i < 0 || i >= BOARD_SIZE) ||
+              (j < 0 || j >= BOARD_SIZE) ||
+              (i === x && j === y)) {
+            continue
+          }
+          if (board[i][j].bomb) {
+            bombCount++
+          }
+        }
+      }
+      board[x][y] = Object.assign({}, board[x][y], { open: true, bombCount: bombCount })
+      this.setState({ board: board })
+
+      if (bombCount === 0) {
+        for (let i = x - 1; i <= x + 1; i++) {
+          for (let j = y - 1; j <= y + 1; j++) {
+            if ((i < 0 || i >= BOARD_SIZE) ||
+                (j < 0 || j >= BOARD_SIZE) ||
+                (i === x && j === y)) {
+              continue
+            }
+            this._open(i, j)
+          }
+        }
+      }
+    }
+  }
+
+  _toggleFlag(x, y) {
+    const board = [].concat(this.state.board)
+    if (!board[x][y].flagged) {
+      board[x][y] = Object.assign({}, board[x][y], { flagged: true })
+    } else {
+      board[x][y] = Object.assign({}, board[x][y], { flagged: false })
+    }
+    this.setState({ board: board })
   }
 
   render() {
     const board = this.state.board
     return (
       <div>
+        <h1>Minesweeper</h1>
         <button onClick={this.handleClick.bind(this)}>Restart</button>
         <Board
           board={board}

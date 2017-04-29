@@ -4,6 +4,8 @@ A React clone of Minesweeper.
 
 [Demo](https://saitoxu.io/playground/react-minesweeper)
 
+![Screenshot](screenshot.gif)
+
 ## Developing
 
 ```sh

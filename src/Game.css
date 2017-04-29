@@ -22,11 +22,19 @@
 #restart:hover {
   opacity: .8;
 }
+#bomb {
+  height: 33px;
+  line-height: 33px;
+  margin-right: 10px;
+}
+.status {
+  height: 33px;
+  line-height: 33px;
+  font-weight: bold;
+}
 #gameover {
   color: red;
-  font-weight: bold;
 }
 #clear {
   color: green;
-  font-weight: bold;
 }

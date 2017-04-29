@@ -38,7 +38,7 @@ export default class Cell extends Component {
     if (this.props.cell.open) {
       style = Object.assign({}, style, openStyle)
       if (this.props.cell.bomb) {
-        content = <Bomb />
+        content = <Bomb style={{ marginTop: -3 }} />
         style = Object.assign({}, style, { backgroundColor: 'red' })
       } else {
         if (this.props.cell.bombCount > 0) {

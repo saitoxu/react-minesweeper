@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import Bomb from 'react-icons/lib/fa/certificate'
 import Board from './Board'
 import './Game.css'
 
@@ -11,7 +12,8 @@ export default class Game extends Component {
     this.state = {
       board: this._initBoard(),
       gameover: false,
-      clear: false
+      clear: false,
+      bomb: BOMB_NUM
     }
   }
 
@@ -52,7 +54,8 @@ export default class Game extends Component {
     this.setState({
       board: this._initBoard(),
       gameover: false,
-      clear: false
+      clear: false,
+      bomb: BOMB_NUM
     })
   }
 
@@ -88,12 +91,12 @@ export default class Game extends Component {
       }
       board[x][y] = Object.assign({}, board[x][y], { open: true, bombCount: bombCount })
       if (board[x][y].bomb) {
-        this.setState({ board: board, gameover: true, clear: false })
+        this.setState({ board: board, gameover: true, clear: false, bomb: this.state.bomb })
       } else {
         if (this._isClear(board)) {
-          this.setState({ board: board, gameover: false, clear: true })
+          this.setState({ board: board, gameover: false, clear: true, bomb: this.state.bomb })
         } else {
-          this.setState({ board: board, gameover: false, clear: false })
+          this.setState({ board: board, gameover: false, clear: false, bomb: this.state.bomb })
         }
       }
 
@@ -126,23 +129,33 @@ export default class Game extends Component {
 
   _toggleFlag(x, y) {
     const board = [].concat(this.state.board)
+    let newBomb = this.state.bomb
     if (!board[x][y].flagged) {
       board[x][y] = Object.assign({}, board[x][y], { flagged: true })
+      newBomb--
     } else {
       board[x][y] = Object.assign({}, board[x][y], { flagged: false })
+      newBomb++
     }
-    this.setState({ board: board })
+    const newState = Object.assign({}, this.state, { board: board, bomb: newBomb })
+    this.setState(newState)
   }
 
   render() {
     const board = this.state.board
+    let status = <span className="status"></span>
+    if (this.state.gameover) {
+      status = <span id="gameover" className="status">Gameover</span>
+    } else if (this.state.clear) {
+      status = <span id="clear" className="status">Clear!</span>
+    }
     return (
       <div id="game">
         <h1>Minesweeper</h1>
         <div id="menu">
           <button onClick={this.handleClick.bind(this)} id="restart">Restart</button>
-          {this.state.gameover && <span id="gameover">Gameover</span>}
-          {this.state.clear && <span id="clear">Clear!</span>}
+          <span id="bomb"><Bomb style={{ marginTop: -3 }} /> {this.state.bomb}</span>
+          {status}
         </div>
         <Board
           board={board}

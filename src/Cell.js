@@ -1,23 +1,19 @@
 import React, { Component } from 'react'
 import Flag from 'react-icons/lib/fa/flag'
 import Bomb from 'react-icons/lib/fa/certificate'
+import './Cell.css'
 
 const baseStyle = {
-  width: 24,
-  height: 24,
-  backgroundColor: 'lightgray',
+  width: 32,
+  height: 32,
   border: 'outset 4px white',
-  textAlign: 'center',
-  lineHeight: '24px',
-  fontWeight: 'bold',
-  cursor: 'pointer'
+  lineHeight: '32px'
 }
 
 const openStyle = {
-  width: 30,
-  height: 30,
-  lineHeight: '30px',
-  backgroundColor: 'lightgray',
+  width: 38,
+  height: 38,
+  lineHeight: '38px',
   border: 'solid 1px darkgray'
 }
 
@@ -34,9 +30,17 @@ export default class Cell extends Component {
 
   render() {
     let content = this.props.cell.flagged ? <Flag /> : ''
-    let style = baseStyle
+    let style = Object.assign({}, baseStyle, {
+      width: this.props.cellSize - 8,
+      height: this.props.cellSize - 8,
+      lineHeight: `${this.props.cellSize - 8}px`,
+    })
     if (this.props.cell.open) {
-      style = Object.assign({}, style, openStyle)
+      style = Object.assign({}, style, openStyle, {
+        width: this.props.cellSize - 2,
+        height: this.props.cellSize - 2,
+        lineHeight: `${this.props.cellSize - 2}px`
+      })
       if (this.props.cell.bomb) {
         content = <Bomb style={{ marginTop: -3 }} />
         style = Object.assign({}, style, { backgroundColor: 'red' })
@@ -78,6 +82,7 @@ export default class Cell extends Component {
     }
     return (
       <div
+        className="cell"
         style={style}
         onClick={this._handleClick.bind(this)}
         onContextMenu={this._handleRightClick.bind(this)}

@@ -1,26 +1,29 @@
 import React, { Component } from 'react'
 import Bomb from 'react-icons/lib/fa/certificate'
 import Board from './Board'
+import Config from './Config'
 import './Game.css'
 
-const BOARD_SIZE = 9
-const BOMB_NUM = 10
+const config = Config
 
 export default class Game extends Component {
   constructor(props) {
     super(props)
+    const difficulty = 'easy'
     this.state = {
-      board: this._initBoard(),
+      board: this._initBoard(difficulty),
       gameover: false,
       clear: false,
-      bomb: BOMB_NUM
+      bomb: config[difficulty].bombNum,
+      difficulty: difficulty
     }
   }
 
-  _initBoard() {
-    const bombPlaces = this._initBombPlaces()
+  _initBoard(difficulty) {
+    const bombPlaces = this._initBombPlaces(difficulty)
+    const { boardWidth, boardHeight } = config[difficulty]
     const board = Array.from(
-      new Array(BOARD_SIZE), () => new Array(BOARD_SIZE).fill(
+      new Array(boardWidth), () => new Array(boardHeight).fill(
         { bomb: false, bombCount: 0, open: false, flagged: false }
       )
     )
@@ -30,11 +33,12 @@ export default class Game extends Component {
     return board
   }
 
-  _initBombPlaces() {
+  _initBombPlaces(difficulty) {
     const bombPlaces = []
-    while (bombPlaces.length < BOMB_NUM) {
-      const x = Math.floor(Math.random() * BOARD_SIZE)
-      const y = Math.floor(Math.random() * BOARD_SIZE)
+    const { boardWidth, boardHeight, bombNum } = config[difficulty]
+    while (bombPlaces.length < bombNum) {
+      const x = Math.floor(Math.random() * boardWidth)
+      const y = Math.floor(Math.random() * boardHeight)
       if (bombPlaces.length === 0) {
         bombPlaces.push({ x: x, y: y })
       } else {
@@ -51,11 +55,12 @@ export default class Game extends Component {
 
   handleClick(e) {
     e.preventDefault()
+    const difficulty = this.state.difficulty
     this.setState({
-      board: this._initBoard(),
+      board: this._initBoard(difficulty),
       gameover: false,
       clear: false,
-      bomb: BOMB_NUM
+      bomb: config[difficulty].bombNum
     })
   }
 
@@ -73,14 +78,26 @@ export default class Game extends Component {
     this._toggleFlag(x, y)
   }
 
+  changeDifficulty(e) {
+    const difficulty = e.target.value
+    this.setState({
+      board: this._initBoard(difficulty),
+      gameover: false,
+      clear: false,
+      bomb: config[difficulty].bombNum,
+      difficulty: difficulty
+    })
+  }
+
   _open(x, y) {
     const board = [].concat(this.state.board)
+    const { boardWidth, boardHeight } = config[this.state.difficulty]
     if (!board[x][y].open) {
       let bombCount = 0
       for (let i = x - 1; i <= x + 1; i++) {
         for (let j = y - 1; j <= y + 1; j++) {
-          if ((i < 0 || i >= BOARD_SIZE) ||
-              (j < 0 || j >= BOARD_SIZE) ||
+          if ((i < 0 || i >= boardWidth) ||
+              (j < 0 || j >= boardHeight) ||
               (i === x && j === y)) {
             continue
           }
@@ -91,20 +108,20 @@ export default class Game extends Component {
       }
       board[x][y] = Object.assign({}, board[x][y], { open: true, bombCount: bombCount })
       if (board[x][y].bomb) {
-        this.setState({ board: board, gameover: true, clear: false, bomb: this.state.bomb })
+        this.setState({ board: board, gameover: true })
       } else {
         if (this._isClear(board)) {
-          this.setState({ board: board, gameover: false, clear: true, bomb: this.state.bomb })
+          this.setState({ board: board, clear: true })
         } else {
-          this.setState({ board: board, gameover: false, clear: false, bomb: this.state.bomb })
+          this.setState({ board: board })
         }
       }
 
       if (bombCount === 0 && !board[x][y].bomb) {
         for (let i = x - 1; i <= x + 1; i++) {
           for (let j = y - 1; j <= y + 1; j++) {
-            if ((i < 0 || i >= BOARD_SIZE) ||
-                (j < 0 || j >= BOARD_SIZE) ||
+            if ((i < 0 || i >= boardWidth) ||
+                (j < 0 || j >= boardHeight) ||
                 (i === x && j === y)) {
               continue
             }
@@ -117,6 +134,7 @@ export default class Game extends Component {
 
   _isClear(board) {
     let openCount = 0
+    const { boardWidth, boardHeight, bombNum } = config[this.state.difficulty]
     board.forEach((row, i) => {
       row.forEach((cell, i) => {
         if (cell.open) {
@@ -124,7 +142,7 @@ export default class Game extends Component {
         }
       })
     })
-    return openCount === (BOARD_SIZE * BOARD_SIZE - BOMB_NUM)
+    return openCount === (boardWidth * boardHeight - bombNum)
   }
 
   _toggleFlag(x, y) {
@@ -137,12 +155,13 @@ export default class Game extends Component {
       board[x][y] = Object.assign({}, board[x][y], { flagged: false })
       newBomb++
     }
-    const newState = Object.assign({}, this.state, { board: board, bomb: newBomb })
-    this.setState(newState)
+    this.setState({ board: board, bomb: newBomb })
   }
 
   render() {
     const board = this.state.board
+    const { boardWidth, cellSize } = config[this.state.difficulty]
+    const boardWidthPx = boardWidth * cellSize
     let status = <span className="status"></span>
     if (this.state.gameover) {
       status = <span id="gameover" className="status">Gameover</span>
@@ -150,25 +169,33 @@ export default class Game extends Component {
       status = <span id="clear" className="status">Clear!</span>
     }
     return (
-      <div id="game">
+      <div id="game" style={{ width: boardWidthPx }}>
         <h1>Minesweeper</h1>
         <div id="menu">
           <button onClick={this.handleClick.bind(this)} id="restart">Restart</button>
+          <select value={this.state.difficulty} onChange={(e) => this.changeDifficulty(e)} style={{ marginRight: 5 }}>
+            <option value={'easy'} key={'easy'}>Easy</option>
+            <option value={'normal'} key={'normal'}>Normal</option>
+            <option value={'hard'} key={'hard'}>Hard</option>
+            <option value={'veryHard'} key={'veryHard'}>Very Hard</option>
+            <option value={'maniac'} key={'maniac'}>Maniac</option>
+          </select>
           <span id="bomb"><Bomb style={{ marginTop: -3 }} /> {this.state.bomb}</span>
           {status}
         </div>
         <Board
           board={board}
+          cellSize={cellSize}
           onClick={this.handleClickCell.bind(this)}
           onRightClick={this.handleRightClickCell.bind(this)}
         />
         <div>
           <p>
-            <span style={{fontWeight: 'bold', color: 'gray'}}>HOW TO PLAY: </span>
+            <span style={{ fontWeight: 'bold', color: 'gray' }}>HOW TO PLAY: </span>
             <span>Click a cell then open it. You can toggle a flag by right click.</span>
           </p>
           <hr />
-          <p style={{textAlign: 'right'}}>
+          <p style={{ textAlign: 'right' }}>
             <span>Created by </span>
             <a href="https://github.com/saitoxu">Yosuke Saito</a>
             <br />

@@ -11,6 +11,7 @@ export default class Row extends Component {
           cell={cell}
           x={this.props.x}
           y={i}
+          cellSize={this.props.cellSize}
           onClick={this.props.onClick}
           onRightClick={this.props.onRightClick}
         />

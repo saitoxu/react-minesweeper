@@ -78,6 +78,28 @@ export default class Game extends Component {
     this._toggleFlag(x, y)
   }
 
+  handleDoubleClickCell(x, y) {
+    const { boardWidth, boardHeight } = config[this.state.difficulty]
+    if (this.state.gameover || this.state.clear) {
+      return
+    }
+    if (!this.state.board[x][y].open) {
+      return
+    }
+
+    for (let i = x - 1; i <= x + 1; i++) {
+      for (let j = y - 1; j <= y + 1; j++) {
+        if ((i < 0 || i >= boardWidth) ||
+            (j < 0 || j >= boardHeight) ||
+            (i === x && j === y) ||
+            (this.state.board[i][j].flagged)) {
+          continue
+        }
+        this._open(i, j)
+      }
+    }
+  }
+
   changeDifficulty(e) {
     const difficulty = e.target.value
     this.setState({
@@ -188,11 +210,14 @@ export default class Game extends Component {
           cellSize={cellSize}
           onClick={this.handleClickCell.bind(this)}
           onRightClick={this.handleRightClickCell.bind(this)}
+          onDoubleClick={this.handleDoubleClickCell.bind(this)}
         />
         <div>
           <p>
-            <span style={{ fontWeight: 'bold', color: 'gray' }}>HOW TO PLAY: </span>
-            <span>Click a cell then open it. You can toggle a flag by right click.</span>
+            <span style={{ fontWeight: 'bold' }}>HOW TO PLAY</span><br />
+            <span style={{ fontSize: 14 }}>Click: Open a cell.</span><br />
+            <span style={{ fontSize: 14 }}>Right Click: Toggle a flag.</span><br />
+            <span style={{ fontSize: 14 }}>Double Click: Open cells around open cell except flagged at once. Only enable for open cell.</span>
           </p>
           <hr />
           <p style={{ textAlign: 'right' }}>

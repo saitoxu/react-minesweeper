@@ -7,7 +7,8 @@ const baseStyle = {
   width: 32,
   height: 32,
   border: 'outset 4px white',
-  lineHeight: '32px'
+  lineHeight: '32px',
+  userSelect: 'none'
 }
 
 const openStyle = {
@@ -21,6 +22,11 @@ export default class Cell extends Component {
   _handleClick(e) {
     e.preventDefault()
     this.props.onClick(this.props.x, this.props.y)
+  }
+
+  _handleDoubleClick(e) {
+    e.preventDefault()
+    this.props.onDoubleClick(this.props.x, this.props.y)
   }
 
   _handleRightClick(e) {
@@ -85,6 +91,7 @@ export default class Cell extends Component {
         className="cell"
         style={style}
         onClick={this._handleClick.bind(this)}
+        onDoubleClick={this._handleDoubleClick.bind(this)}
         onContextMenu={this._handleRightClick.bind(this)}
       >
         {content}

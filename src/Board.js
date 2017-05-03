@@ -14,6 +14,7 @@ export default class Board extends Component {
           cellSize={this.props.cellSize}
           onClick={this.props.onClick}
           onRightClick={this.props.onRightClick}
+          onDoubleClick={this.props.onDoubleClick}
         />
       )
     })

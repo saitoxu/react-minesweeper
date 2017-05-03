@@ -23,7 +23,6 @@ Changes and improvements are more than welcome! Feel free to fork and open a pul
 
 - Count elapsed time
 - Add question mark
-- Add feature to open cells around already open cell at once
 - Use Redux
 - Improve design
 - Refactoring

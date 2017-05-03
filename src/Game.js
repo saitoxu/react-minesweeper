@@ -129,6 +129,9 @@ export default class Game extends Component {
         }
       }
       board[x][y] = Object.assign({}, board[x][y], { open: true, bombCount: bombCount })
+      if (board[x][y].flagged) {
+        this._toggleFlag(x, y)
+      }
       if (board[x][y].bomb) {
         this.setState({ board: board, gameover: true })
       } else {
@@ -144,7 +147,8 @@ export default class Game extends Component {
           for (let j = y - 1; j <= y + 1; j++) {
             if ((i < 0 || i >= boardWidth) ||
                 (j < 0 || j >= boardHeight) ||
-                (i === x && j === y)) {
+                (i === x && j === y) ||
+                (board[i][j].flagged)) {
               continue
             }
             this._open(i, j)

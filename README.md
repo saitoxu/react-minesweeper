@@ -6,7 +6,7 @@ A React clone of Minesweeper.
 
 ![Screenshot](screenshot.gif)
 
-## Developing
+## Development
 
 ```sh
 $ git clone https://github.com/saitoxu/react-minesweeper.git
@@ -23,7 +23,6 @@ Changes and improvements are more than welcome! Feel free to fork and open a pul
 
 - Count elapsed time
 - Add question mark
-- Use Redux
 - Improve design
 - Refactoring
 

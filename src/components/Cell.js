@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import Flag from 'react-icons/lib/fa/flag'
 import Bomb from 'react-icons/lib/fa/certificate'
-import './Cell.css'
+import '../styles/Cell.css'
 
 const baseStyle = {
   width: 32,
@@ -19,6 +19,13 @@ const openStyle = {
 }
 
 export default class Cell extends Component {
+  constructor(props) {
+    super(props)
+    this._handleClick = this._handleClick.bind(this)
+    this._handleDoubleClick = this._handleDoubleClick.bind(this)
+    this._handleRightClick = this._handleRightClick.bind(this)
+  }
+
   _handleClick(e) {
     e.preventDefault()
     this.props.onClick(this.props.x, this.props.y)
@@ -90,9 +97,9 @@ export default class Cell extends Component {
       <div
         className="cell"
         style={style}
-        onClick={this._handleClick.bind(this)}
-        onDoubleClick={this._handleDoubleClick.bind(this)}
-        onContextMenu={this._handleRightClick.bind(this)}
+        onClick={this._handleClick}
+        onDoubleClick={this._handleDoubleClick}
+        onContextMenu={this._handleRightClick}
       >
         {content}
       </div>

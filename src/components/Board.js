@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import Row from './Row'
-import './Board.css'
+import '../styles/Board.css'
 
 export default class Board extends Component {
   renderRows() {

@@ -1,22 +1,20 @@
 import React, { Component } from 'react'
+import { connect } from 'react-redux'
 import Bomb from 'react-icons/lib/fa/certificate'
 import Board from './Board'
-import Config from './Config'
-import './Game.css'
+import config from '../config'
+import { toggle, init, changeDifficulty, gameover, clear } from '../actions'
+import '../styles/Game.css'
 
-const config = Config
-
-export default class Game extends Component {
+class Game extends Component {
   constructor(props) {
     super(props)
-    const difficulty = 'easy'
-    this.state = {
-      board: this._initBoard(difficulty),
-      gameover: false,
-      clear: false,
-      bomb: config[difficulty].bombNum,
-      difficulty: difficulty
-    }
+    const { difficulty } = this.props
+    this.state = { board: this._initBoard(difficulty) }
+    this.handleClick = this.handleClick.bind(this)
+    this.handleClickCell = this.handleClickCell.bind(this)
+    this.handleRightClickCell = this.handleRightClickCell.bind(this)
+    this.handleDoubleClickCell = this.handleDoubleClickCell.bind(this)
   }
 
   _initBoard(difficulty) {
@@ -55,35 +53,35 @@ export default class Game extends Component {
 
   handleClick(e) {
     e.preventDefault()
-    const difficulty = this.state.difficulty
-    this.setState({
-      board: this._initBoard(difficulty),
-      gameover: false,
-      clear: false,
-      bomb: config[difficulty].bombNum
-    })
+    const { difficulty } = this.props
+    this.props.dispatch(init())
+    this.setState({ board: this._initBoard(difficulty) })
   }
 
   handleClickCell(x, y) {
-    if (this.state.gameover || this.state.clear) {
+    const { gameover, clear } = this.props
+    if (gameover || clear) {
       return
     }
     this._open(x, y)
   }
 
   handleRightClickCell(x, y) {
-    if (this.state.gameover || this.state.clear) {
+    const { gameover, clear } = this.props
+    if (gameover || clear) {
       return
     }
     this._toggleFlag(x, y)
   }
 
   handleDoubleClickCell(x, y) {
-    const { boardWidth, boardHeight } = config[this.state.difficulty]
-    if (this.state.gameover || this.state.clear) {
+    const { gameover, clear, difficulty } = this.props
+    const { boardWidth, boardHeight } = config[difficulty]
+    const { board } = this.state
+    if (gameover || clear) {
       return
     }
-    if (!this.state.board[x][y].open) {
+    if (!board[x][y].open) {
       return
     }
 
@@ -92,7 +90,7 @@ export default class Game extends Component {
         if ((i < 0 || i >= boardWidth) ||
             (j < 0 || j >= boardHeight) ||
             (i === x && j === y) ||
-            (this.state.board[i][j].flagged)) {
+            (board[i][j].flagged)) {
           continue
         }
         this._open(i, j)
@@ -102,18 +100,13 @@ export default class Game extends Component {
 
   changeDifficulty(e) {
     const difficulty = e.target.value
-    this.setState({
-      board: this._initBoard(difficulty),
-      gameover: false,
-      clear: false,
-      bomb: config[difficulty].bombNum,
-      difficulty: difficulty
-    })
+    this.props.dispatch(changeDifficulty(difficulty))
+    this.setState({ board: this._initBoard(difficulty) })
   }
 
   _open(x, y) {
     const board = [].concat(this.state.board)
-    const { boardWidth, boardHeight } = config[this.state.difficulty]
+    const { boardWidth, boardHeight } = config[this.props.difficulty]
     if (!board[x][y].open) {
       let bombCount = 0
       for (let i = x - 1; i <= x + 1; i++) {
@@ -129,17 +122,15 @@ export default class Game extends Component {
         }
       }
       board[x][y] = Object.assign({}, board[x][y], { open: true, bombCount: bombCount })
+      this.setState({ board })
       if (board[x][y].flagged) {
         this._toggleFlag(x, y)
       }
       if (board[x][y].bomb) {
-        this.setState({ board: board, gameover: true })
-      } else {
-        if (this._isClear(board)) {
-          this.setState({ board: board, clear: true })
-        } else {
-          this.setState({ board: board })
-        }
+        this.props.dispatch(gameover())
+      }
+      if (this._isClear(board)) {
+        this.props.dispatch(clear())
       }
 
       if (bombCount === 0 && !board[x][y].bomb) {
@@ -160,7 +151,8 @@ export default class Game extends Component {
 
   _isClear(board) {
     let openCount = 0
-    const { boardWidth, boardHeight, bombNum } = config[this.state.difficulty]
+    const { difficulty } = this.props
+    const { boardWidth, boardHeight, bombNum } = config[difficulty]
     board.forEach((row, i) => {
       row.forEach((cell, i) => {
         if (cell.open) {
@@ -173,48 +165,44 @@ export default class Game extends Component {
 
   _toggleFlag(x, y) {
     const board = [].concat(this.state.board)
-    let newBomb = this.state.bomb
-    if (!board[x][y].flagged) {
-      board[x][y] = Object.assign({}, board[x][y], { flagged: true })
-      newBomb--
-    } else {
-      board[x][y] = Object.assign({}, board[x][y], { flagged: false })
-      newBomb++
-    }
-    this.setState({ board: board, bomb: newBomb })
+    const { flagged } = board[x][y]
+    board[x][y] = Object.assign({}, board[x][y], { flagged: !flagged })
+    this.setState({ board })
+    this.props.dispatch(toggle(!flagged))
   }
 
   render() {
-    const board = this.state.board
-    const { boardWidth, cellSize } = config[this.state.difficulty]
+    const { board } = this.state
+    const { difficulty, gameover, clear, bomb } = this.props
+    const { boardWidth, cellSize } = config[difficulty]
     const boardWidthPx = boardWidth * cellSize
     let status = <span className="status"></span>
-    if (this.state.gameover) {
+    if (gameover) {
       status = <span id="gameover" className="status">Gameover</span>
-    } else if (this.state.clear) {
+    } else if (clear) {
       status = <span id="clear" className="status">Clear!</span>
     }
     return (
       <div id="game" style={{ width: boardWidthPx }}>
         <h1>Minesweeper</h1>
         <div id="menu">
-          <button onClick={this.handleClick.bind(this)} id="restart">Restart</button>
-          <select value={this.state.difficulty} onChange={(e) => this.changeDifficulty(e)} style={{ marginRight: 5 }}>
+          <button onClick={this.handleClick} id="restart">Restart</button>
+          <select value={difficulty} onChange={(e) => this.changeDifficulty(e)} style={{ marginRight: 5 }}>
             <option value={'easy'} key={'easy'}>Easy</option>
             <option value={'normal'} key={'normal'}>Normal</option>
             <option value={'hard'} key={'hard'}>Hard</option>
             <option value={'veryHard'} key={'veryHard'}>Very Hard</option>
             <option value={'maniac'} key={'maniac'}>Maniac</option>
           </select>
-          <span id="bomb"><Bomb style={{ marginTop: -3 }} /> {this.state.bomb}</span>
+          <span id="bomb"><Bomb style={{ marginTop: -3 }} /> {bomb}</span>
           {status}
         </div>
         <Board
           board={board}
           cellSize={cellSize}
-          onClick={this.handleClickCell.bind(this)}
-          onRightClick={this.handleRightClickCell.bind(this)}
-          onDoubleClick={this.handleDoubleClickCell.bind(this)}
+          onClick={this.handleClickCell}
+          onRightClick={this.handleRightClickCell}
+          onDoubleClick={this.handleDoubleClickCell}
         />
         <div>
           <p>
@@ -236,3 +224,7 @@ export default class Game extends Component {
     )
   }
 }
+
+const mapStateToProps = (state) => state.game
+
+export default connect(mapStateToProps)(Game)

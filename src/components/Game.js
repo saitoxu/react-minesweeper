@@ -10,11 +10,18 @@ class Game extends Component {
   constructor(props) {
     super(props)
     const { difficulty } = this.props
-    this.state = { board: this._initBoard(difficulty) }
+    this.state = { board: this._initBoard(difficulty), elapsedTime: 0, isGameStarted: false }
     this.handleClick = this.handleClick.bind(this)
     this.handleClickCell = this.handleClickCell.bind(this)
     this.handleRightClickCell = this.handleRightClickCell.bind(this)
     this.handleDoubleClickCell = this.handleDoubleClickCell.bind(this)
+
+    this.countElapsedTimeHandler = setInterval(() => {
+      if (!this.props.gameover && this.state.isGameStarted) {
+        const { elapsedTime } = this.state;
+        this.setState({ elapsedTime: elapsedTime + 1 });
+      }
+    }, 1000);
   }
 
   _initBoard(difficulty) {
@@ -28,6 +35,9 @@ class Game extends Component {
     for (let place of bombPlaces) {
       board[place.x][place.y] = Object.assign({}, board[place.x][place.y], { bomb: true })
     }
+
+    this.setState({ elapsedTime: 0, isGameStarted: false });
+
     return board
   }
 
@@ -63,6 +73,7 @@ class Game extends Component {
     if (gameover || clear) {
       return
     }
+    this.setState({ isGameStarted: true })
     this._open(x, y)
   }
 
@@ -197,6 +208,7 @@ class Game extends Component {
           <span id="bomb"><Bomb style={{ marginTop: -3 }} /> {bomb}</span>
           {status}
         </div>
+        <h4>Elapsed Time: {this.state.elapsedTime} sec</h4>
         <Board
           board={board}
           cellSize={cellSize}
